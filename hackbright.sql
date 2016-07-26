@@ -100,17 +100,35 @@ ALTER SEQUENCE projects_id_seq OWNED BY projects.id;
 
 
 --
--- Name: student; Type: TABLE; Schema: public; Owner: user; Tablespace: 
+-- Name: students; Type: TABLE; Schema: public; Owner: user; Tablespace: 
 --
 
-CREATE TABLE student (
+CREATE TABLE students (
     first_name character varying(30),
     last_name character varying(30),
-    github character varying(30)
+    github character varying(30) NOT NULL,
+    fav_food character varying(20)
 );
 
 
-ALTER TABLE public.student OWNER TO "user";
+ALTER TABLE public.students OWNER TO "user";
+
+--
+-- Name: reportcardview; Type: VIEW; Schema: public; Owner: user
+--
+
+CREATE VIEW reportcardview AS
+ SELECT students.first_name,
+    students.last_name,
+    projects.title,
+    projects.max_grade,
+    grades.grade
+   FROM ((students
+     JOIN grades ON (((students.github)::text = (grades.student_github)::text)))
+     JOIN projects ON (((projects.title)::text = (grades.project_title)::text)));
+
+
+ALTER TABLE public.reportcardview OWNER TO "user";
 
 --
 -- Name: id; Type: DEFAULT; Schema: public; Owner: user
@@ -166,12 +184,12 @@ SELECT pg_catalog.setval('projects_id_seq', 5, true);
 
 
 --
--- Data for Name: student; Type: TABLE DATA; Schema: public; Owner: user
+-- Data for Name: students; Type: TABLE DATA; Schema: public; Owner: user
 --
 
-COPY student (first_name, last_name, github) FROM stdin;
-Jane	Hacker	jhacks
-Sarah	Developer	sdevelops
+COPY students (first_name, last_name, github, fav_food) FROM stdin;
+Sarah	Developer	sdevelops	\N
+Jane	Hacker	jhacks	Pizza
 \.
 
 
@@ -189,6 +207,14 @@ ALTER TABLE ONLY grades
 
 ALTER TABLE ONLY projects
     ADD CONSTRAINT projects_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: student_pkey; Type: CONSTRAINT; Schema: public; Owner: user; Tablespace: 
+--
+
+ALTER TABLE ONLY students
+    ADD CONSTRAINT student_pkey PRIMARY KEY (github);
 
 
 --
